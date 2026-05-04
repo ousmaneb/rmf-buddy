@@ -1,0 +1,16 @@
+backend/.venv/
+backend/rmf.db
+backend/__pycache__/
+backend/app/__pycache__/
+backend/.env
+backend/.env.*
+frontend/node_modules/
+frontend/dist/
+data/cci.zip
+.DS_Store
+.env
+.env.*
+*.log
+.claude/logs/
+.vscode/
+.idea/
