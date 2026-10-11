@@ -335,6 +335,41 @@ future deployment scenario where the threat model changes.
 
 ---
 
+### 15. Cross-Site Request Forgery against the local API (second pass)
+
+**Issue:** `GET /api/study/scenario` called the paid LLM, so any web page the
+user visited could trigger it with `<img src="http://127.0.0.1:8911/...">`.
+The JSON POST endpoints (`/api/chat/stream`, `/api/study/grade`) could also be
+hit with a `no-cors` fetch that sends no `Content-Type`, which FastAPI parses
+as JSON.
+
+**Fix:**
+- `/api/study/scenario` is now `POST` with a JSON body `{"family": ...}`.
+- `LocalRequestGuardMiddleware` (security.py) rejects any `/api` request other
+  than GET/HEAD/OPTIONS that lacks `X-RMF-Buddy: 1`. Browsers can only add a
+  custom header cross-origin after a CORS preflight, and the preflight is only
+  allowed for the localhost origins in `ALLOWED_ORIGINS`.
+- Optional `RMF_BUDDY_TOKEN`: off by default. When set, every `/api` request
+  except `/api/health` must carry it in `X-RMF-Buddy-Token` (constant-time
+  compare). The Vite proxy injects it, so it never reaches browser JS.
+- The `TrustedHostMiddleware` DNS-rebinding guard is unchanged.
+
+Tests: `backend/tests/test_security_guard.py`.
+
+### 16. Reproducible Python dependencies (second pass)
+
+`requirements.txt` used `>=` ranges. Direct deps now live in
+`requirements.in`; `requirements.txt` is a fully pinned universal lock
+(Python 3.10+). `pip-audit -r requirements.txt` reports no known
+vulnerabilities at the time of locking.
+
+### 17. Personal paths in committed Claude Code config (second pass)
+
+`.claude/start-rmf.sh` hard-coded a personal absolute path; it now derives
+the repo root from `$CLAUDE_PROJECT_DIR` or its own location. The "go" hook
+moved to the shared `.claude/settings.json`; `.claude/settings.local.json`
+(personal permissions) is untracked and gitignored.
+
 ## Categories Reviewed With No Findings
 
 For completeness — these categories from the audit checklist were

@@ -14,3 +14,7 @@ data/cci.zip
 .claude/logs/
 .vscode/
 .idea/
+.claude/settings.local.json
+__pycache__/
+.pytest_cache/
+*.tsbuildinfo

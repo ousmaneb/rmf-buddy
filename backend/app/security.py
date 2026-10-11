@@ -13,6 +13,8 @@ local dev tool. If you decide to deploy this server publicly, add auth and
 revisit allowed origins.
 """
 from __future__ import annotations
+import hmac
+import os
 import re
 from typing import Iterable
 
@@ -74,6 +76,61 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if "server" in h:
             del h["server"]
         return response
+
+
+# ---------- Cross-site request guard + optional local token ----------
+
+# Every request the frontend makes carries this header. Browsers cannot add a
+# custom header to a cross-site request without a CORS preflight, and the
+# preflight only succeeds for ALLOWED_ORIGINS. So requiring it on
+# state-changing / paid requests blocks CSRF-style abuse from other websites
+# (e.g. a hidden form or `fetch(..., {mode: "no-cors"})` that would otherwise
+# spend LLM credits).
+CSRF_HEADER = "x-rmf-buddy"
+# Optional shared secret. Off unless RMF_BUDDY_TOKEN is set. When set, every
+# /api request (except /api/health and CORS preflights) must send it in
+# X-RMF-Buddy-Token. The Vite dev/preview proxy injects it server-side from
+# the same variable, so the token never ships in the browser bundle.
+TOKEN_HEADER = "x-rmf-buddy-token"
+_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+_TOKEN_EXEMPT_PATHS = frozenset({"/api/health"})
+
+
+def _local_token() -> str:
+    # Read lazily so backend/.env (loaded by app.llm) and test overrides apply.
+    return os.environ.get("RMF_BUDDY_TOKEN", "").strip()
+
+
+class LocalRequestGuardMiddleware:
+    """Pure-ASGI middleware (safe with streaming responses)."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or not scope.get("path", "").startswith("/api/"):
+            return await self.app(scope, receive, send)
+        method = scope.get("method", "GET").upper()
+        if method == "OPTIONS":
+            return await self.app(scope, receive, send)
+        headers = {k.decode("latin-1").lower(): v.decode("latin-1")
+                   for k, v in scope.get("headers", [])}
+
+        token = _local_token()
+        if token and scope["path"] not in _TOKEN_EXEMPT_PATHS:
+            supplied = headers.get(TOKEN_HEADER, "")
+            if not hmac.compare_digest(supplied.encode(), token.encode()):
+                return await _deny(scope, receive, send, 401, "missing or invalid token")
+
+        if method not in _SAFE_METHODS and headers.get(CSRF_HEADER) != "1":
+            return await _deny(scope, receive, send, 403, "missing X-RMF-Buddy header")
+
+        return await self.app(scope, receive, send)
+
+
+async def _deny(scope, receive, send, status: int, detail: str) -> None:
+    resp = JSONResponse(status_code=status, content={"detail": detail})
+    await resp(scope, receive, send)
 
 
 # ---------- Prompt injection sanitizer for tool results ----------
@@ -195,5 +252,6 @@ async def sanitized_exception_handler(request: Request, exc: Exception) -> JSONR
 
 def install(app: FastAPI) -> None:
     """Install all security middleware and exception handlers on the app."""
+    app.add_middleware(LocalRequestGuardMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_exception_handler(Exception, sanitized_exception_handler)

@@ -86,8 +86,20 @@ export type StreamEvent =
   | { type: "done"; stop_reason: string }
   | { type: "error"; message: string };
 
+/**
+ * fetch() wrapper for the backend. Always sends X-RMF-Buddy: 1, which the
+ * backend requires on POSTs: other websites cannot add a custom header to a
+ * cross-site request without a CORS preflight the backend will reject.
+ * (The optional RMF_BUDDY_TOKEN is injected by the Vite proxy, not here.)
+ */
+function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers);
+  headers.set("X-RMF-Buddy", "1");
+  return fetch(input, { ...init, headers });
+}
+
 export async function listFamilies(): Promise<Family[]> {
-  return (await fetch("/api/families")).json();
+  return (await apiFetch("/api/families")).json();
 }
 
 export async function listControls(params: {
@@ -97,23 +109,23 @@ export async function listControls(params: {
 }): Promise<ControlSummary[]> {
   const url = new URL("/api/controls", window.location.origin);
   Object.entries(params).forEach(([k, v]) => v && url.searchParams.set(k, v));
-  return (await fetch(url.pathname + url.search)).json();
+  return (await apiFetch(url.pathname + url.search)).json();
 }
 
 export async function getControl(id: string): Promise<Control> {
-  return (await fetch(`/api/controls/${encodeURIComponent(id)}`)).json();
+  return (await apiFetch(`/api/controls/${encodeURIComponent(id)}`)).json();
 }
 
 export async function listEmassTopics(): Promise<EmassTopicSummary[]> {
-  return (await fetch("/api/emass/topics")).json();
+  return (await apiFetch("/api/emass/topics")).json();
 }
 
 export async function getEmassTopic(slug: string): Promise<EmassTopic> {
-  return (await fetch(`/api/emass/topics/${encodeURIComponent(slug)}`)).json();
+  return (await apiFetch(`/api/emass/topics/${encodeURIComponent(slug)}`)).json();
 }
 
 export async function listEmassGlossary(): Promise<EmassTerm[]> {
-  return (await fetch("/api/emass/glossary")).json();
+  return (await apiFetch("/api/emass/glossary")).json();
 }
 
 export type GrcTopicSummary = EmassTopicSummary;
@@ -121,43 +133,47 @@ export type GrcTopic = EmassTopic;
 export type GrcTerm = EmassTerm;
 
 export async function listGrcTopics(): Promise<GrcTopicSummary[]> {
-  return (await fetch("/api/grc/topics")).json();
+  return (await apiFetch("/api/grc/topics")).json();
 }
 
 export async function getGrcTopic(slug: string): Promise<GrcTopic> {
-  return (await fetch(`/api/grc/topics/${encodeURIComponent(slug)}`)).json();
+  return (await apiFetch(`/api/grc/topics/${encodeURIComponent(slug)}`)).json();
 }
 
 export async function listGrcGlossary(): Promise<GrcTerm[]> {
-  return (await fetch("/api/grc/glossary")).json();
+  return (await apiFetch("/api/grc/glossary")).json();
 }
 
 export async function listNistPublications(): Promise<NistPubSummary[]> {
-  return (await fetch("/api/nist/publications")).json();
+  return (await apiFetch("/api/nist/publications")).json();
 }
 
 export async function getNistPublication(slug: string): Promise<NistPub> {
-  return (await fetch(`/api/nist/publications/${encodeURIComponent(slug)}`)).json();
+  return (await apiFetch(`/api/nist/publications/${encodeURIComponent(slug)}`)).json();
 }
 
 export async function getBaselineDiff(low: string, high: string): Promise<BaselineDiff> {
   const u = new URL("/api/baselines/diff", window.location.origin);
   u.searchParams.set("low", low);
   u.searchParams.set("high", high);
-  return (await fetch(u.pathname + u.search)).json();
+  return (await apiFetch(u.pathname + u.search)).json();
 }
 
 export async function getFlashcards(family?: string, count = 10): Promise<Flashcard[]> {
   const url = new URL("/api/study/flashcards", window.location.origin);
   if (family) url.searchParams.set("family", family);
   url.searchParams.set("count", String(count));
-  return (await fetch(url.pathname + url.search)).json();
+  return (await apiFetch(url.pathname + url.search)).json();
 }
 
 export async function getScenario(family?: string): Promise<Scenario> {
-  const url = new URL("/api/study/scenario", window.location.origin);
-  if (family) url.searchParams.set("family", family);
-  return (await fetch(url.pathname + url.search)).json();
+  return (
+    await apiFetch("/api/study/scenario", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ family: family || null }),
+    })
+  ).json();
 }
 
 export async function gradeAnswer(body: {
@@ -166,7 +182,7 @@ export async function gradeAnswer(body: {
   user_answer: string;
 }): Promise<Grade> {
   return (
-    await fetch("/api/study/grade", {
+    await apiFetch("/api/study/grade", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -185,7 +201,7 @@ export async function streamChat(
   onEvent: (e: StreamEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
-  const r = await fetch("/api/chat/stream", {
+  const r = await apiFetch("/api/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages, mode, context }),
