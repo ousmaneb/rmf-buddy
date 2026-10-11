@@ -8,7 +8,10 @@ set -u
 prompt=$(jq -r '.prompt // ""' | tr -d '[:space:]')
 [[ "$prompt" == "go" ]] || exit 0
 
-ROOT="/Users/alphabah/Library/CloudStorage/OneDrive-Personal/Dell Windows/ClaudeCode/RMF Tool"
+# Repo root = parent of this script's directory (no hard-coded personal path).
+# CLAUDE_PROJECT_DIR is set by Claude Code; fall back to the script location.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="${CLAUDE_PROJECT_DIR:-$(dirname "$SCRIPT_DIR")}"
 LOG_DIR="$ROOT/.claude/logs"
 mkdir -p "$LOG_DIR"
 

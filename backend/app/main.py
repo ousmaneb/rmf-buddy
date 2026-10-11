@@ -11,7 +11,7 @@ Endpoints:
   POST /api/workflow/assess     - assessment plan
   POST /api/workflow/compare    - side-by-side comparison
   GET  /api/study/flashcards    - flashcards for a family
-  GET  /api/study/scenario      - generate a practice scenario
+  POST /api/study/scenario      - generate a practice scenario
   POST /api/study/grade         - grade a scenario answer
 """
 from __future__ import annotations
@@ -66,7 +66,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=list(ALLOWED_ORIGINS),
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Accept"],
+    allow_headers=["Content-Type", "Accept", "X-RMF-Buddy", "X-RMF-Buddy-Token"],
     allow_credentials=False,
     max_age=600,
 )
@@ -820,9 +820,19 @@ def _json_only_chat(system: str, user: str, max_tokens: int = 600) -> str:
     return (resp.choices[0].message.content or "").strip()
 
 
-@app.get("/api/study/scenario")
-def scenario(family: Optional[str] = Query(None, max_length=10)) -> dict:
-    """Generate a practice scenario."""
+class ScenarioRequest(BaseModel):
+    family: Optional[str] = Field(None, max_length=10)
+
+
+@app.post("/api/study/scenario")
+def scenario(req: Optional[ScenarioRequest] = None) -> dict:
+    """Generate a practice scenario.
+
+    POST (not GET) because it spends paid LLM credits: a GET could be fired
+    cross-site by any web page via <img src>. POSTs also require the
+    X-RMF-Buddy header (see security.LocalRequestGuardMiddleware).
+    """
+    family = req.family if req else None
     family_hint = f" focused on the {family.upper()} family" if family else ""
     text = _json_only_chat(
         system=(
