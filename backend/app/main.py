@@ -20,12 +20,13 @@ import os
 import random
 import sqlite3
 from pathlib import Path
-from typing import Any, Iterator, Optional
+from typing import Annotated, Any, Iterator, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .emass_kb import get_topic, list_glossary, list_topics, lookup_term
 from .grc_kb import (
@@ -69,6 +70,15 @@ app.add_middleware(
     allow_credentials=False,
     max_age=600,
 )
+# DNS-rebinding guard: the server binds 127.0.0.1, so only accept requests
+# whose Host header is a loopback name. Override with RMF_BUDDY_ALLOWED_HOSTS
+# (comma-separated) if you deliberately expose it elsewhere.
+_ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get(
+        "RMF_BUDDY_ALLOWED_HOSTS", "localhost,127.0.0.1"
+    ).split(",") if h.strip()
+]
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=_ALLOWED_HOSTS)
 install_security(app)
 
 
@@ -105,8 +115,8 @@ def families() -> list[dict]:
 def list_controls(
     family: Optional[str] = None,
     baseline: Optional[str] = Query(None, description="LOW | MODERATE | HIGH"),
-    q: Optional[str] = None,
-    limit: int = 500,
+    q: Optional[str] = Query(None, max_length=500),
+    limit: int = Query(500, ge=1, le=2000),
 ) -> list[dict]:
     """List/filter controls. `q` matches label, title, statement, discussion,
     assessment objectives, AND linked CCI ids / definitions (via subquery)."""
@@ -776,7 +786,7 @@ def chat_stream(req: StreamChatRequest):
 # ---------- study mode ----------
 
 @app.get("/api/study/flashcards")
-def flashcards(family: Optional[str] = None, count: int = 10) -> list[dict]:
+def flashcards(family: Optional[str] = None, count: int = Query(10, ge=1, le=100)) -> list[dict]:
     """Return random control/CCI cards for a family (or all)."""
     con = db()
     sql = ("SELECT id, label, title, family_name, statement FROM controls "
@@ -811,7 +821,7 @@ def _json_only_chat(system: str, user: str, max_tokens: int = 600) -> str:
 
 
 @app.get("/api/study/scenario")
-def scenario(family: Optional[str] = None) -> dict:
+def scenario(family: Optional[str] = Query(None, max_length=10)) -> dict:
     """Generate a practice scenario."""
     family_hint = f" focused on the {family.upper()} family" if family else ""
     text = _json_only_chat(
@@ -830,9 +840,10 @@ def scenario(family: Optional[str] = None) -> dict:
 
 
 class GradeRequest(BaseModel):
-    scenario: str
-    expected_controls: list[str]
-    user_answer: str
+    # Length caps: these fields are forwarded to a paid LLM.
+    scenario: str = Field(max_length=4_000)
+    expected_controls: list[Annotated[str, Field(max_length=40)]] = Field(max_length=30)
+    user_answer: str = Field(max_length=MAX_CHAT_MESSAGE_CHARS)
 
 
 @app.post("/api/study/grade")
