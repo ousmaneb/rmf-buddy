@@ -1,6 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/*
+  Tailwind v4 expresses font-size line-heights as ratios, which children
+  inherit as ratios (so a `text-[10px]` badge inside `text-sm` text gets a
+  smaller line box than in v3). Use v3's absolute rem values to keep layout
+  identical.
+*/
+@theme {
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Tailwind v4 dropped cursor: pointer on buttons; keep the v3 behaviour. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 html, body, #root { height: 100%; overflow: hidden; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
@@ -15,7 +54,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 .prose-rmf ul { @apply list-disc ml-6 my-2 text-slate-700; }
 .prose-rmf li { @apply my-1; }
 .prose-rmf strong { @apply text-slate-900; }
-.prose-rmf code { @apply bg-slate-100 text-slate-800 px-1 py-0.5 rounded text-sm; }
+.prose-rmf code { @apply bg-slate-100 text-slate-800 px-1 py-0.5 rounded-sm text-sm; }
 
 /* Brief highlight pulse when a CCI is deep-linked from a search. */
 @keyframes cci-flash {
