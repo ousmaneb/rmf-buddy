@@ -82,7 +82,7 @@ function Header({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
         title="Go to home"
         className="shrink-0 text-left hover:opacity-75 transition cursor-pointer"
       >
-        <div className="font-bold text-base sm:text-lg text-slate-900 leading-tight">RMF Buddy</div>
+        <div className="font-bold text-base sm:text-lg text-slate-900 leading-tight sm:leading-7">RMF Buddy</div>
         <div className="text-[11px] text-slate-500 leading-tight hidden sm:block">
           Your friendly RMF tutor
         </div>
@@ -365,7 +365,7 @@ function ChatView({ homeNonce = 0 }: { homeNonce?: number }) {
         <div className="p-3 border-b border-slate-200">
           <button
             onClick={startNew}
-            className="w-full bg-slate-900 text-white text-sm font-semibold py-2 rounded hover:bg-slate-800"
+            className="w-full bg-slate-900 text-white text-sm font-semibold py-2 rounded-sm hover:bg-slate-800"
           >
             + New chat
           </button>
@@ -435,7 +435,7 @@ function ChatView({ homeNonce = 0 }: { homeNonce?: number }) {
                 ? "Type your question here and press Enter…"
                 : `Type your request - ${MODE_INFO[mode].help}`
             }
-            className="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
+            className="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-base focus:outline-hidden focus:ring-2 focus:ring-slate-900 focus:border-slate-900"
             disabled={streaming}
             autoFocus
           />
@@ -526,7 +526,7 @@ function ModeBar({
                     className={
                       "shrink-0 text-sm font-semibold px-3 py-1.5 rounded-lg border transition whitespace-nowrap " +
                       (selected
-                        ? `${c.bg} ${c.text} border-2 border-slate-900 shadow-sm`
+                        ? `${c.bg} ${c.text} border-2 border-slate-900 shadow-xs`
                         : `${c.bg} ${c.border} ${c.text} ${c.hover}`)
                     }
                   >
@@ -561,13 +561,13 @@ function ModeBar({
                 value={ctx[field] || ""}
                 onChange={(e) => setCtx({ ...ctx, [field]: e.target.value })}
                 placeholder={fieldPlaceholder(field)}
-                className="text-sm border border-slate-300 rounded px-3 py-1.5 w-64 bg-white"
+                className="text-sm border border-slate-300 rounded-sm px-3 py-1.5 w-64 bg-white"
               />
             ))}
             <button
               onClick={() => ready && !streaming && onRunTemplate(templatePrompt(mode, ctx))}
               disabled={!ready || streaming}
-              className="bg-slate-900 text-white px-4 py-1.5 rounded font-semibold disabled:opacity-40 hover:bg-slate-800 text-sm"
+              className="bg-slate-900 text-white px-4 py-1.5 rounded-sm font-semibold disabled:opacity-40 hover:bg-slate-800 text-sm"
             >
               Generate →
             </button>
@@ -799,7 +799,7 @@ function BrowseView() {
         }`}
       >
         <div className="p-4 border-b border-slate-200 space-y-2">
-          <div className="text-xs text-slate-500 mb-1">
+          <div className="text-xs text-slate-500 mb-3">
             Browse all 1,196 NIST 800-53 controls. Click one to see its full text, CCIs, and ATT&amp;CK coverage.
           </div>
           <input
@@ -836,7 +836,7 @@ function BrowseView() {
             <div className="text-xs text-slate-500">{items.length} controls</div>
             <button
               onClick={() => setShowDiff(true)}
-              className="text-xs font-semibold px-3 py-1.5 rounded bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900"
+              className="text-xs font-semibold px-3 py-1.5 rounded-sm bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900"
               title="See which controls are added or removed between Low / Moderate / High baselines"
             >
               Compare Baselines
@@ -855,7 +855,7 @@ function BrowseView() {
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-semibold text-slate-800">{c.label}</span>
                   {c.is_enhancement === 1 && (
-                    <span className="text-[10px] bg-slate-200 text-slate-700 px-1 rounded">ENH</span>
+                    <span className="text-[10px] bg-slate-200 text-slate-700 px-1 rounded-sm">ENH</span>
                   )}
                 </div>
                 <div className="text-sm text-slate-700">{c.title}</div>
@@ -919,7 +919,7 @@ function ControlDetail({ id, highlightCci }: { id: string; highlightCci?: string
         {ctrl.baselines.map((b) => (
           <span
             key={b}
-            className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold"
+            className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-sm font-semibold"
           >
             {b}
           </span>
@@ -961,7 +961,7 @@ function ControlDetail({ id, highlightCci }: { id: string; highlightCci?: string
                   key={c.id}
                   id={`cci-${c.id}`}
                   className={
-                    "bg-white border rounded p-3 text-sm transition-colors duration-300 " +
+                    "bg-white border rounded-sm p-3 text-sm transition-colors duration-300 " +
                     (isTarget ? "border-amber-500 ring-2 ring-amber-300" : "border-slate-200")
                   }
                 >
@@ -971,7 +971,7 @@ function ControlDetail({ id, highlightCci }: { id: string; highlightCci?: string
                       <span className="text-xs text-slate-500">{"->"} {c.control_index}</span>
                     )}
                     {isTarget && (
-                      <span className="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded font-semibold">
+                      <span className="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded-sm font-semibold">
                         SEARCHED
                       </span>
                     )}
@@ -990,7 +990,7 @@ function ControlDetail({ id, highlightCci }: { id: string; highlightCci?: string
           </div>
           <ul className="space-y-2">
             {ctrl.attack.map((t) => (
-              <li key={t.id} className="bg-white border border-rose-200 rounded p-3 text-sm">
+              <li key={t.id} className="bg-white border border-rose-200 rounded-sm p-3 text-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <a
                     href={`https://attack.mitre.org/techniques/${t.id.replace(".", "/")}`}
@@ -1056,7 +1056,7 @@ function BaselineDiffView({ onClose }: { onClose: () => void }) {
           <select
             value={low}
             onChange={(e) => setLow(e.target.value)}
-            className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white"
+            className="border border-slate-300 rounded-sm px-3 py-1.5 text-sm bg-white"
           >
             <option>LOW</option>
             <option>MODERATE</option>
@@ -1067,7 +1067,7 @@ function BaselineDiffView({ onClose }: { onClose: () => void }) {
           <select
             value={high}
             onChange={(e) => setHigh(e.target.value)}
-            className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white"
+            className="border border-slate-300 rounded-sm px-3 py-1.5 text-sm bg-white"
           >
             <option>LOW</option>
             <option>MODERATE</option>
@@ -1075,13 +1075,13 @@ function BaselineDiffView({ onClose }: { onClose: () => void }) {
           </select>
           {diff && !sameBaseline && (
             <div className="ml-2 flex gap-3 text-xs">
-              <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded font-semibold">
+              <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded-sm font-semibold">
                 {diff.shared_count} shared
               </span>
-              <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded font-semibold">
+              <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-sm font-semibold">
                 +{diff.added.length} added
               </span>
-              <span className="bg-rose-100 text-rose-800 px-2 py-1 rounded font-semibold">
+              <span className="bg-rose-100 text-rose-800 px-2 py-1 rounded-sm font-semibold">
                 -{diff.removed.length} removed
               </span>
             </div>
@@ -1137,7 +1137,7 @@ function DiffColumn({
           <li key={c.id} className="px-3 py-1.5 text-sm">
             <span className="font-mono font-semibold text-slate-800">{c.label}</span>
             {c.is_enhancement === 1 && (
-              <span className="ml-1 text-[10px] bg-slate-200 text-slate-700 px-1 rounded">ENH</span>
+              <span className="ml-1 text-[10px] bg-slate-200 text-slate-700 px-1 rounded-sm">ENH</span>
             )}
             <span className="text-slate-700"> - {c.title}</span>
           </li>
@@ -1449,7 +1449,7 @@ function LibraryView() {
             >
               Open at csrc.nist.gov ↗
             </a>
-            <div className="bg-white border border-slate-200 rounded p-3 my-4 text-sm text-slate-700">
+            <div className="bg-white border border-slate-200 rounded-sm p-3 my-4 text-sm text-slate-700">
               {pub.summary}
             </div>
             <article className="prose-rmf">
@@ -1738,7 +1738,7 @@ function FlashcardsView() {
           <select
             value={family}
             onChange={(e) => setFamily(e.target.value)}
-            className="flex-1 min-w-[180px] border border-slate-300 rounded px-2 py-1.5 text-sm bg-white"
+            className="flex-1 min-w-[180px] border border-slate-300 rounded-sm px-2 py-1.5 text-sm bg-white"
           >
             <option value="">All families</option>
             {families.map((f) => (
@@ -1751,7 +1751,7 @@ function FlashcardsView() {
           <select
             value={count}
             onChange={(e) => setCount(Number(e.target.value))}
-            className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white"
+            className="border border-slate-300 rounded-sm px-2 py-1.5 text-sm bg-white"
           >
             {[5, 10, 15, 20, 30].map((n) => (
               <option key={n} value={n}>{n}</option>
@@ -1760,7 +1760,7 @@ function FlashcardsView() {
           <button
             onClick={load}
             disabled={loading}
-            className="bg-slate-900 text-white px-4 py-1.5 rounded font-semibold text-sm disabled:opacity-50 hover:bg-slate-800"
+            className="bg-slate-900 text-white px-4 py-1.5 rounded-sm font-semibold text-sm disabled:opacity-50 hover:bg-slate-800"
           >
             {loading ? "Loading..." : cards.length > 0 ? "New deck" : "Start ->"}
           </button>
@@ -1824,13 +1824,13 @@ function FlashcardsView() {
                 setI((x) => Math.max(0, x - 1));
               }}
               disabled={i === 0}
-              className="px-3 py-1.5 text-sm bg-white border border-slate-300 rounded hover:border-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-sm hover:border-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {"<-"} Previous
             </button>
             <button
               onClick={() => setReveal((r) => !r)}
-              className="px-4 py-1.5 text-sm font-semibold bg-slate-900 text-white rounded hover:bg-slate-800"
+              className="px-4 py-1.5 text-sm font-semibold bg-slate-900 text-white rounded-sm hover:bg-slate-800"
             >
               {reveal ? "Hide answer" : "Reveal answer"}
             </button>
@@ -1840,7 +1840,7 @@ function FlashcardsView() {
                 setI((x) => Math.min(cards.length - 1, x + 1));
               }}
               disabled={i >= cards.length - 1}
-              className="px-3 py-1.5 text-sm bg-white border border-slate-300 rounded hover:border-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-sm hover:border-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               Next {"->"}
             </button>
@@ -1909,7 +1909,7 @@ function ScenariosView() {
           <select
             value={family}
             onChange={(e) => setFamily(e.target.value)}
-            className="flex-1 min-w-[180px] border border-slate-300 rounded px-2 py-1.5 text-sm bg-white"
+            className="flex-1 min-w-[180px] border border-slate-300 rounded-sm px-2 py-1.5 text-sm bg-white"
           >
             <option value="">Any family</option>
             {families.map((f) => (
@@ -1921,7 +1921,7 @@ function ScenariosView() {
           <button
             onClick={fresh}
             disabled={loading}
-            className="bg-slate-900 text-white px-4 py-1.5 rounded font-semibold text-sm disabled:opacity-50 hover:bg-slate-800"
+            className="bg-slate-900 text-white px-4 py-1.5 rounded-sm font-semibold text-sm disabled:opacity-50 hover:bg-slate-800"
           >
             {loading ? "Generating..." : scenario ? "New scenario" : "Start ->"}
           </button>
@@ -1946,13 +1946,13 @@ function ScenariosView() {
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="List the 800-53 controls you think apply (e.g. AC-2, AU-6) and a short reason for each..."
             rows={5}
-            className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-slate-900"
           />
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={submit}
               disabled={!answer.trim() || grading}
-              className="bg-slate-900 text-white px-5 py-1.5 rounded font-semibold text-sm disabled:opacity-40 hover:bg-slate-800"
+              className="bg-slate-900 text-white px-5 py-1.5 rounded-sm font-semibold text-sm disabled:opacity-40 hover:bg-slate-800"
             >
               {grading ? "Grading..." : "Submit answer"}
             </button>

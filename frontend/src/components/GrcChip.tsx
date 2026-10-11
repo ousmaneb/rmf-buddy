@@ -27,13 +27,13 @@ export function GrcChip({ slug }: { slug: string }) {
     <span className="inline-block align-baseline">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-semibold"
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-semibold"
       >
         GRC · {topic?.title?.split(" - ")[0] || slug}
         <span className="text-[10px]">{open ? "▾" : "▸"}</span>
       </button>
       {open && (
-        <div className="block my-2 bg-white border border-emerald-200 rounded-lg p-3 shadow-sm text-sm">
+        <div className="block my-2 bg-white border border-emerald-200 rounded-lg p-3 shadow-xs text-sm">
           {loading && <div className="text-slate-400 italic">Loading…</div>}
           {topic && (
             <>

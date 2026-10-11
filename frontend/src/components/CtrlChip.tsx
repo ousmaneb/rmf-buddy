@@ -25,13 +25,13 @@ export function CtrlChip({ id }: { id: string }) {
     <span className="inline-block align-baseline">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 text-xs font-mono font-semibold transition"
+        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 text-xs font-mono font-semibold transition"
       >
         {ctrl?.label || id.toUpperCase()}
         <span className="text-[10px]">{open ? "▾" : "▸"}</span>
       </button>
       {open && (
-        <div className="block my-2 bg-white border border-blue-200 rounded-lg p-3 shadow-sm text-sm">
+        <div className="block my-2 bg-white border border-blue-200 rounded-lg p-3 shadow-xs text-sm">
           {loading && <div className="text-slate-400 italic">Loading…</div>}
           {ctrl && (
             <>
@@ -46,7 +46,7 @@ export function CtrlChip({ id }: { id: string }) {
                   {ctrl.baselines.map((b) => (
                     <span
                       key={b}
-                      className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold"
+                      className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-sm font-semibold"
                     >
                       {b}
                     </span>
@@ -96,7 +96,7 @@ export function CtrlChip({ id }: { id: string }) {
 
 export function CciChip({ id }: { id: string }) {
   return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-xs font-mono font-semibold">
+    <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-amber-50 border border-amber-200 text-amber-800 text-xs font-mono font-semibold">
       {id}
     </span>
   );
@@ -111,7 +111,7 @@ export function AttackChip({ id }: { id: string }) {
   const safeId = _ATTACK_ID_RE.test(id) ? id.toUpperCase() : null;
   if (!safeId) {
     return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-mono font-semibold">
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-rose-50 border border-rose-200 text-rose-800 text-xs font-mono font-semibold">
         ATT&amp;CK ?
       </span>
     );
@@ -123,7 +123,7 @@ export function AttackChip({ id }: { id: string }) {
       href={`https://attack.mitre.org/techniques/${encodeURIComponent(path).replace(/%2F/gi, "/")}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-xs font-mono font-semibold hover:bg-rose-100"
+      className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-rose-50 border border-rose-200 text-rose-800 text-xs font-mono font-semibold hover:bg-rose-100"
       title="Open in MITRE ATT&CK"
     >
       ATT&amp;CK {safeId}
